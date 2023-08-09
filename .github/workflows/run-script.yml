@@ -1,22 +1,29 @@
 name: Run Script Every Minute
 
-on: workflow_dispatch
-# on:
-#   schedule:
-#     - cron: "* * * * *"
+on:
+  workflow_dispatch
+  # Uncomment the following lines to schedule the workflow
+  # schedule:
+  #   - cron: "* * * * *"
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
 
     steps:
-      uses: actions/checkout@v3
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      run: npm install
-      run: npm start
-      env:
-        MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
-        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run script
+        run: npm start
+        env:
+          MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
