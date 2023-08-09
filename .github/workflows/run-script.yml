@@ -1,9 +1,9 @@
 name: Run Script Every Minute
 
 on: workflow_dispatch
-on:
-  schedule:
-    - cron: "* * * * *"
+# on:
+#   schedule:
+#     - cron: "* * * * *"
 
 jobs:
   run-script:
