@@ -1,10 +1,9 @@
-name: Run Script Every Minute
+name: Run Script Every Hour
 
 on:
   workflow_dispatch
-  # Uncomment the following lines to schedule the workflow
-  # schedule:
-  #   - cron: "* * * * *"
+  schedule:
+    - cron: "* * * * *"
 
 jobs:
   run-script:
@@ -12,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
 
