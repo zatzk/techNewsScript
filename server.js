@@ -1,5 +1,4 @@
 const axios = require('axios');
-const { WebhookClient } = require('discord.js');
 const { MongoClient } = require('mongodb');
 const dotenv = require('dotenv');
 
@@ -33,18 +32,20 @@ const postToWebhook = async (article) => {
   const articleBody = await fetchArticleData(article);
 
   if (articleBody !== null) {
-    const webhookClient = new WebhookClient({ url: webhookUrl });
-
-    await webhookClient.send({
-      embeds: [{
-        title: article.title,
-        description: articleBody,
-        url: article.source_url,
-      }],
-    });
-
-    console.log(`New article posted: ${article.title}`);
-    previousArticleIds.push(article.id);
+    const articleInfo = `${article.title}\n\n${articleBody}\n\n${article.source_url}`;
+    axios.post(webhookUrl, {
+       username: 'TechNews',
+      //  avatar_url: '',
+       content: articleInfo,
+      })
+      .then(() => {
+        console.log(`New article posted: ${article.title}`);
+        previousArticleIds.push(article.id);
+      })
+      .catch(error => {
+        console.error(`Error posting article to webhook: ${article.title}`);
+        console.error(`Error details:`, error.message);
+      });
   }
 };
 
