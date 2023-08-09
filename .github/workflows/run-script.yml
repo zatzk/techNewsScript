@@ -1,7 +1,5 @@
 name: Run Script Every Hour
 
-# on:
-#   workflow_dispatch
   schedule:
     - cron: "0 * * * *"
 
