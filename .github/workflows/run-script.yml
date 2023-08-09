@@ -1,5 +1,6 @@
 name: Run Script Every Hour
 
+on:
   schedule:
     - cron: "0 * * * *"
 
