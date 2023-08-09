@@ -2,7 +2,7 @@ name: Run Script Every Hour
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "* * * * *"
 
 jobs:
   run-script:
