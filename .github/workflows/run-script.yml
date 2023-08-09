@@ -3,7 +3,7 @@ name: Run Script Every Hour
 on:
   workflow_dispatch
   schedule:
-    - cron: "* * * * *"
+    - cron: "0 * * * *"
 
 jobs:
   run-script:
