@@ -1,14 +1,14 @@
 const axios = require('axios');
 const { WebhookClient } = require('discord.js');
-const cron = require('node-cron');
+const { MongoClient } = require('mongodb');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
 const webhookUrl = process.env.WEBHOOK_URL;
+const mongoConnectionString = process.env.MONGO_CONNECTION_STRING;
 
 let previousArticleIds = [];
-let lastFetchedDay = null;
 
 const fetchArticleData = async (article) => {
   const articleUrl = `https://www.tabnews.com.br/api/v1/contents/NewsletterOficial/${encodeURIComponent(article.slug)}`;
@@ -39,11 +39,8 @@ const postToWebhook = async (article) => {
       embeds: [{
         title: article.title,
         description: articleBody,
-        // fields: [
-        //   { name: 'Content', value: articleBody },
-        // ],
         url: article.source_url,
-      }],      
+      }],
     });
 
     console.log(`New article posted: ${article.title}`);
@@ -51,19 +48,38 @@ const postToWebhook = async (article) => {
   }
 };
 
-const fetchAPIAndPostToWebhook = async () => {
+(async () => {
   try {
+    // Connect to MongoDB
+    const mongoClient = new MongoClient(mongoConnectionString, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    await mongoClient.connect();
+    console.log('Connected to MongoDB');
+
+    const db = mongoClient.db();
+    const collectionName = 'previousArticleIds';
+
+    // Check if it's a new day
+    const currentDay = new Date().toISOString().split('T')[0];
+    console.log(`Current day: ${currentDay}`);
+    const existingCollection = await db.collection(collectionName).findOne({ _id: 'ids' });
+
+    if (existingCollection && currentDay !== existingCollection.day) {
+      // Clear the previousArticleIds array
+      previousArticleIds = [];
+      // Drop the existing collection
+      await db.collection(collectionName).drop();
+      console.log(`Dropped collection ${collectionName}`);
+    } else if (existingCollection) {
+      previousArticleIds = existingCollection.ids;
+    }
+
+    // Fetch and post new articles
     const response = await axios.get('https://www.tabnews.com.br/api/v1/contents/NewsletterOficial/');
 
     if (response.status === 200) {
-      const currentDay = new Date().toISOString().split('T')[0];
-
-      if (currentDay !== lastFetchedDay) {
-        // Reset previousArticleIds array if a new day has started
-        previousArticleIds = [];
-        lastFetchedDay = currentDay;
-      }
-
       const articles = response.data.filter(article => article.published_at.startsWith(currentDay));
       const newArticles = articles.filter(article => !previousArticleIds.includes(article.id));
 
@@ -71,17 +87,22 @@ const fetchAPIAndPostToWebhook = async () => {
         for (const article of newArticles) {
           await postToWebhook(article);
         }
+        // Create a new collection and insert data if it's a new day
+        if (!existingCollection || currentDay !== existingCollection.day) {
+          const newCollection = db.collection(collectionName);
+          await newCollection.insertOne({ _id: 'ids', ids: previousArticleIds, day: currentDay });
+        }
       } else {
         console.log('No new articles for this fetch.');
       }
     } else {
       console.error('Failed to fetch data from API.');
     }
+
+    // Close MongoDB connection
+    await mongoClient.close();
+    console.log('MongoDB connection closed');
   } catch (error) {
     console.error('An error occurred:', error.message);
   }
-};
-
-// Schedule the observer to run every minute (adjust as needed)
-cron.schedule('* * * *', fetchAPIAndPostToWebhook);
-console.log('Observer started.');
+})();
