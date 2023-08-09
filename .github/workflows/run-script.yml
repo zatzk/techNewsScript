@@ -22,3 +22,6 @@ jobs:
 
     - name: Run Script
       run: npm start
+      env:
+        MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
