@@ -32,7 +32,7 @@ const postToWebhook = async (article) => {
   const articleBody = await fetchArticleData(article);
 
   if (articleBody !== null) {
-    const articleInfo = `${article.title}\n\n${articleBody}\n\n${article.source_url}`;
+    const articleInfo = `${article.title}\n\n${articleBody}\n\n${article.source_url}\n\n_____`;
     axios.post(webhookUrl, {
        username: 'TechNews',
       //  avatar_url: '',
