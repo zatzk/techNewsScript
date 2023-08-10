@@ -14,5 +14,5 @@ jobs:
       - run: npm install
       - run: npm start
         env:
-          SECRET_SECRET: ${{ secrets.MONGO_CONNECTION_STRING }}
-          SUPER_SECRET: ${{ secrets.WEBHOOK_URL }}
+          MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
