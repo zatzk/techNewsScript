@@ -92,7 +92,7 @@ const postToWebhook = async (article, webhookUrl) => {
     const articleInfo = `\n\n______________________\n\n${article.title}\n\n${articleBody}\n\n${article.source_url}`;
     axios.post(webhookUrl, {
       username: 'TechNews',
-      //  avatar_url: '',
+      avatar_url: 'https://i.imgur.com/vJyISJ6.jpg',
       content: articleInfo,
     })
     .then(() => {
